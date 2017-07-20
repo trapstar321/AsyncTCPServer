@@ -1,0 +1,74 @@
+20.07.2017 15:54:26.383	INFO	 AsyncTCPServer.cs Bind() Waiting for a connection...
+20.07.2017 15:54:28.822	INFO	 AsyncTCPServer.cs Bind() Waiting for a connection...
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: buffer=
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: read 10 bytes
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: read 6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: left=10
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: opcode=24, length=6. Whole message not yet received
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: at position: 5
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: message not complete
+20.07.2017 15:54:28.831	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: buffer=6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: read 10 bytes
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: read 6,6,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: left=20
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: read message, opcode=24, length=6, data=1,2,3,4,5,6
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: at position: 11
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: got parts of new message.
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: current buffer=6,0,0,0,24,1,2,3,4,5,6,6,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: current buffer length is 9
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: left=9
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: opcode=24, length=6. Whole message not yet received
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: at position: 5
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: message not complete
+20.07.2017 15:54:28.833	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.834	INFO	 AsyncTCPServer.cs ReadCallback() Handler 1: received opcode=24, data=1,2,3,4,5,6
+20.07.2017 15:54:28.835	INFO	 InputOutput.cs EndWrite() Handler 1: send message 1,2,3,4
+20.07.2017 15:54:28.835	INFO	 InputOutput.cs EndWrite() Handler 1: add 4,0,0,0,24,1,2,3,4 to write buffer for client 4,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.835	INFO	 InputOutput.cs EndWrite() Handler 1: write buffer for 10.50.130.128:11000 is 4,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: buffer=6,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: read 2 bytes
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: read 5,6
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: left=11
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: read message, opcode=24, length=6, data=1,2,3,4,5,6
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: at position: 11
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: reset buffer
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 
+20.07.2017 15:54:28.836	INFO	 AsyncTCPServer.cs ReadCallback() Handler 1: received opcode=24, data=1,2,3,4,5,6
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndWrite() Handler 1: send message 1,2,3,4
+20.07.2017 15:54:28.836	INFO	 InputOutput.cs EndWrite() Handler 1: add 4,0,0,0,24,1,2,3,4 to write buffer for client 4,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.838	INFO	 InputOutput.cs EndWrite() Handler 1: write buffer for 10.50.130.128:11000 is 4,0,0,0,24,1,2,3,4,4,0,0,0,24,1,2,3,4
+20.07.2017 15:54:28.839	INFO	 InputOutput.cs EndWrite() Handler 1: send 4,0,0,0,24,1,2,3,4,4,0,0,0,24,1,2,3,4 to client 10.50.130.128:11000
+20.07.2017 15:54:28.839	INFO	 InputOutput.cs EndWrite() Handler 1: whole buffer was sent for client 10.50.130.128:11000
+20.07.2017 15:54:28.839	INFO	 AsyncTCPServer.cs SendCallback() Sent 18 bytes to client.
+20.07.2017 15:54:28.840	INFO	 AsyncTCPServer.cs SendCallback() Sent 9 bytes to client.
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: buffer=
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: read 1 bytes
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: buffer=
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: read 6
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: read 10 bytes
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: left=1
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: message not complete, put received back to buffer
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: read 6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: left=11
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: opcode=0, length=1542. Whole message not yet received
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: at position: 5
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: message not complete
+20.07.2017 15:54:29.840	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6,6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: buffer=6,6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: buffer=6,6,0,0,0,24,1,2,3,4,5
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: read 1 bytes
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: read 6
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: read 10 bytes
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: left=12
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: read 6,0,0,0,0,0,0,0,0,0
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: opcode=0, length=1542. Whole message not yet received
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: left=17
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: at position: 5
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: message not complete
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6,6,0,0,0,24,1,2,3,4,5,6,6,0,0,0,0,0,0,0,0,0
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: opcode=0, length=50463000. Whole message not yet received
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: at position: 5
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: message not complete
+20.07.2017 15:54:30.841	INFO	 InputOutput.cs EndRead() Handler 1: buffer: 6,6,0,0,0,24,1,2,3,4,5,6,6,0,0,0,0,0,0,0,0,0
