@@ -12,8 +12,23 @@ namespace AsyncTCPServer
 {
     public class AsyncTCPServer
     {
-        private ManualResetEvent allDone = new ManualResetEvent(false);
-        private List<Connection> connections = new List<Connection>();
+        public class ReceivedEventArgs : EventArgs
+        {
+            public Message[] Messages { get; private set; }
+            public int ClientID { get; private set; }
+
+            public ReceivedEventArgs(int clientID, Message[] messages)
+            {
+                Messages = messages;
+                ClientID = clientID;
+            }
+        }
+
+        public delegate void Received(object sender, ReceivedEventArgs e);
+        public event Received OnReceived;
+
+        private ManualResetEvent allDone = new ManualResetEvent(false);        
+        private Dictionary<int, Connection> connections = new Dictionary<int, Connection>();
         private Socket listener;
         private IPEndPoint localEndPoint;
         private InputOutput io;
@@ -65,6 +80,30 @@ namespace AsyncTCPServer
             }
         }
 
+        public void Send(int clientID, Message message) {
+            Connection connection = connections[clientID];
+            byte[] wbuffer;
+            lock (connection.wbuffer_lock)
+            {                
+                io.AddMessageToWriteBuffer(connection, message);
+                wbuffer = connection.GetWBuffer();
+            }
+            
+            log.add_to_log(log_vrste.info, "BeginSend", "AsyncTCPServer.cs Send()");
+            lock (connection.sendLock)
+            {
+                if (connection.sendComplete)
+                {
+                    connection.sendComplete = false;                    
+                    if (wbuffer.Length == 0) {
+                        string s = "";
+                    }
+                    log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(wbuffer)), "AsyncTCPServer.cs Send()");
+                    connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
+                }
+            }
+        }
+
         public void AcceptCallback(IAsyncResult ar)
         {
             // Signal the main thread to continue.
@@ -75,13 +114,15 @@ namespace AsyncTCPServer
             Socket handler = listener.EndAccept(ar);
 
             Connection connection = new Connection(handler);
-            connections.Add(connection);
-            
+            connections.Add(connection.uid, connection);
+
+            log.add_to_log(log_vrste.info, "AcceptCallback", "AsyncTCPServer.cs ReadCallback()");
             handler.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None, new AsyncCallback(ReadCallback), connection);
         }
 
         public void ReadCallback(IAsyncResult ar)
-        {            
+        {
+            log.add_to_log(log_vrste.info, "EndRead", "AsyncTCPServer.cs ReadCallback()");
             Connection connection = (Connection)ar.AsyncState;
             
             int bytesRead = connection.socket.EndReceive(ar);
@@ -90,56 +131,81 @@ namespace AsyncTCPServer
 
             if (messages.Count > 0)
             {
-                foreach (Message message in messages)
-                {
-                    log.add_to_log(log_vrste.info, String.Format("Handler {0}: received opcode={1}, data={2}", connection.uid, message.opcode, io.ByteArrayToString(message.data)), "AsyncTCPServer.cs ReadCallback()");
-                }
-
-                io.AddMessageToWriteBuffer(connection, new Message(24, new byte[] { 1, 2, 3, 4 }));
-                byte[] wbuffer = connection.wbuffer.ToArray();
-                connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
-
-                if (status == IOStatus.INCOMPLETE)
+                /*if (status == IOStatus.INCOMPLETE)
                 {
                     connection.socket.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
                         new AsyncCallback(ReadCallback), connection);
-                }
+                }*/
+                ReceivedEventArgs args = new ReceivedEventArgs(connection.uid, messages.ToArray());
+                OnReceived?.Invoke(this, args);
             }
-            else {
-                connection.socket.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
+            //else {
+            log.add_to_log(log_vrste.info, "BeginReceive", "AsyncTCPServer.cs ReadCallback()");
+            connection.socket.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
                     new AsyncCallback(ReadCallback), connection);
-            }
+            //}
         }
 
         private void SendCallback(IAsyncResult ar)
-        {
+        {            
+            log.add_to_log(log_vrste.info, "EndSend", "AsyncTCPServer.cs SendCallback()");
             // Retrieve the socket from the state object.
-            Connection connection = (Connection)ar.AsyncState;
+            Connection connection = (Connection)ar.AsyncState;            
+
+            lock (connection.sendLock)
+            {
+                connection.sendComplete = true;
+            }
 
             // Complete sending the data to the remote device.
             int bytesSent = connection.socket.EndSend(ar);
-            IOStatus status = io.EndWrite(connection, bytesSent);
+
+            if (bytesSent == 0)
+            {
+                string s = "";
+            }
+
+            //lock write buffer to make sure no new messages are added while handling end write
+            byte[] wbuffer;
+            lock (connection.wbuffer_lock)
+            {
+                io.EndWrite(connection, bytesSent);
+                wbuffer = connection.GetWBuffer();
+            }
+
             log.add_to_log(log_vrste.info, String.Format("Sent {0} bytes to client.", bytesSent), "AsyncTCPServer.cs SendCallback()");
 
-            if (status == IOStatus.INCOMPLETE)
+                
+            if (wbuffer.Length > 0)
             {
-                byte[] wbuffer = connection.wbuffer.ToArray();
-                connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(ReadCallback), connection);
-            }
-            else
-            {
-                connection.socket.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
-                    new AsyncCallback(ReadCallback), connection);
+                lock (connection.sendLock)
+                    connection.sendComplete = false;
+
+                if (wbuffer.Length == 0)
+                {
+                    string s = "";
+                }
+                log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(wbuffer)), "AsyncTCPServer.cs SendCallback()");
+                connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
             }            
         }
 
         static void Main(string[] args)
         {
             AsyncTCPServer server = new AsyncTCPServer(11000);
-            server.Bind();
+            server.OnReceived += server.Server_OnReceived;
+            server.Bind();            
 
             Console.WriteLine("\nPress ENTER to continue...");
             Console.Read();
+        }
+
+        private void Server_OnReceived(object sender, ReceivedEventArgs e)
+        {
+            log.add_to_log(log_vrste.info, String.Format("Received {0}", e.Messages.Length), "AsyncTCPClient.cs Client_OnReceived()");
+            AsyncTCPServer server = (AsyncTCPServer)sender;
+            server.Send(e.ClientID, new Message(24, new byte[] { 1, 2, 3, 4 }));
+            
         }
     }
 }

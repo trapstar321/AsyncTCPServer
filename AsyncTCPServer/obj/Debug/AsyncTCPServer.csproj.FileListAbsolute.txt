@@ -4,3 +4,9 @@ c:\users\tomicaj\documents\visual studio 2015\Projects\AsyncTCPServer\AsyncTCPSe
 c:\users\tomicaj\documents\visual studio 2015\Projects\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.csprojResolveAssemblyReference.cache
 c:\users\tomicaj\documents\visual studio 2015\Projects\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.exe
 c:\users\tomicaj\documents\visual studio 2015\Projects\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.pdb
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\bin\Debug\AsyncTCPServer.exe.config
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.exe
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.pdb
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\bin\Debug\AsyncTCPServer.exe
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\bin\Debug\AsyncTCPServer.pdb
+C:\Users\tomica\Documents\Visual Studio 2015\AsyncTCPServer\AsyncTCPServer\obj\Debug\AsyncTCPServer.csprojResolveAssemblyReference.cache
