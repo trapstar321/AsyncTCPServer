@@ -18,16 +18,15 @@ namespace AsyncTCPServer
         public int uid;
         public Socket socket;
 
-        public object wbuffer_lock = new object();
+        public object write_lock = new object();
+
+        public byte[] tmp_rbuffer = new byte[RBUFFER_SIZE];
         private MemoryStream rbuffer = new MemoryStream();
-        private MemoryStream wbuffer = new MemoryStream();
 
-        public byte[] bytes_read = new byte[RBUFFER_SIZE];
+        public MemoryStream tmp_wbuffer = new MemoryStream();
+        private MemoryStream wbuffer = new MemoryStream();        
 
-        public int position;
-
-        public object sendLock = new object();
-        public bool sendComplete = true;
+        public int position;        
 
         public Connection(Socket socket)
         {
@@ -67,6 +66,27 @@ namespace AsyncTCPServer
         public void WriteWBuffer(byte[] data, int start, int length)
         {
             wbuffer.Write(data, start, length);
+        }
+
+        public byte[] GetTmpWBuffer()
+        {
+            return tmp_wbuffer.ToArray();
+        }
+
+        public void ResetTmpWBuffer()
+        {
+            tmp_wbuffer = new MemoryStream();
+        }
+
+        public void WriteTmpWBuffer(byte[] data, int start, int length)
+        {
+            tmp_wbuffer.Write(data, start, length);
+        }
+
+        public void CopyWBufferToTmp() {
+            byte[] tmp = wbuffer.ToArray();
+            tmp_wbuffer.Write(tmp, 0, tmp.Length);
+            ResetWBuffer();
         }
 
         public override string ToString()

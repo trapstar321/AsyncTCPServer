@@ -82,23 +82,47 @@ namespace AsyncTCPServer
 
         public void Send(int clientID, Message message) {
             Connection connection = connections[clientID];
-            byte[] wbuffer;
-            lock (connection.wbuffer_lock)
-            {                
-                io.AddMessageToWriteBuffer(connection, message);
-                wbuffer = connection.GetWBuffer();
-            }
-            
-            log.add_to_log(log_vrste.info, "BeginSend", "AsyncTCPServer.cs Send()");
-            lock (connection.sendLock)
+            lock (connection.write_lock)
             {
-                if (connection.sendComplete)
+                io.AddMessageToWriteBuffer(connection, message);
+
+                if (connection.tmp_wbuffer.Length == 0)
                 {
-                    connection.sendComplete = false;                    
-                    if (wbuffer.Length == 0) {
-                        string s = "";
-                    }
-                    log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(wbuffer)), "AsyncTCPServer.cs Send()");
+                    connection.CopyWBufferToTmp();
+                    log.add_to_log(log_vrste.info, "BeginSend", "AsyncTCPServer.cs Send()");
+
+                    byte[] tmp_wbuffer = connection.GetTmpWBuffer();
+
+                    log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(tmp_wbuffer)), "AsyncTCPServer.cs Send()");
+                    connection.socket.BeginSend(tmp_wbuffer, 0, tmp_wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
+                }
+            }
+        }
+
+        private void SendCallback(IAsyncResult ar)
+        {
+            log.add_to_log(log_vrste.info, "EndSend", "AsyncTCPServer.cs SendCallback()");
+            // Retrieve the socket from the state object.
+            Connection connection = (Connection)ar.AsyncState;
+
+            // Complete sending the data to the remote device.
+            int bytesSent = connection.socket.EndSend(ar);
+
+            //lock write buffer to make sure no new messages are added while handling end write
+            lock (connection.write_lock)
+            {
+                byte[] wbuffer;
+                io.EndWrite(connection, bytesSent);
+                wbuffer = connection.GetWBuffer();
+
+                log.add_to_log(log_vrste.info, String.Format("Sent {0} bytes to client.", bytesSent), "AsyncTCPServer.cs SendCallback()");
+
+
+                if (wbuffer.Length > 0)
+                {
+                    connection.CopyWBufferToTmp();
+                    wbuffer = connection.GetTmpWBuffer();
+                    log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(wbuffer)), "AsyncTCPServer.cs SendCallback()");
                     connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
                 }
             }
@@ -117,7 +141,7 @@ namespace AsyncTCPServer
             connections.Add(connection.uid, connection);
 
             log.add_to_log(log_vrste.info, "AcceptCallback", "AsyncTCPServer.cs ReadCallback()");
-            handler.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None, new AsyncCallback(ReadCallback), connection);
+            handler.BeginReceive(connection.tmp_rbuffer, 0, Connection.RBUFFER_SIZE, SocketFlags.None, new AsyncCallback(ReadCallback), connection);
         }
 
         public void ReadCallback(IAsyncResult ar)
@@ -141,54 +165,10 @@ namespace AsyncTCPServer
             }
             //else {
             log.add_to_log(log_vrste.info, "BeginReceive", "AsyncTCPServer.cs ReadCallback()");
-            connection.socket.BeginReceive(connection.bytes_read, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
+            connection.socket.BeginReceive(connection.tmp_rbuffer, 0, Connection.RBUFFER_SIZE, SocketFlags.None,
                     new AsyncCallback(ReadCallback), connection);
             //}
-        }
-
-        private void SendCallback(IAsyncResult ar)
-        {            
-            log.add_to_log(log_vrste.info, "EndSend", "AsyncTCPServer.cs SendCallback()");
-            // Retrieve the socket from the state object.
-            Connection connection = (Connection)ar.AsyncState;            
-
-            lock (connection.sendLock)
-            {
-                connection.sendComplete = true;
-            }
-
-            // Complete sending the data to the remote device.
-            int bytesSent = connection.socket.EndSend(ar);
-
-            if (bytesSent == 0)
-            {
-                string s = "";
-            }
-
-            //lock write buffer to make sure no new messages are added while handling end write
-            byte[] wbuffer;
-            lock (connection.wbuffer_lock)
-            {
-                io.EndWrite(connection, bytesSent);
-                wbuffer = connection.GetWBuffer();
-            }
-
-            log.add_to_log(log_vrste.info, String.Format("Sent {0} bytes to client.", bytesSent), "AsyncTCPServer.cs SendCallback()");
-
-                
-            if (wbuffer.Length > 0)
-            {
-                lock (connection.sendLock)
-                    connection.sendComplete = false;
-
-                if (wbuffer.Length == 0)
-                {
-                    string s = "";
-                }
-                log.add_to_log(log_vrste.info, String.Format("Current buffer: {0}", io.ByteArrayToString(wbuffer)), "AsyncTCPServer.cs SendCallback()");
-                connection.socket.BeginSend(wbuffer, 0, wbuffer.Length, SocketFlags.None, new AsyncCallback(SendCallback), connection);
-            }            
-        }
+        }        
 
         static void Main(string[] args)
         {
@@ -202,7 +182,7 @@ namespace AsyncTCPServer
 
         private void Server_OnReceived(object sender, ReceivedEventArgs e)
         {
-            log.add_to_log(log_vrste.info, String.Format("Received {0}", e.Messages.Length), "AsyncTCPClient.cs Client_OnReceived()");
+            log.add_to_log(log_vrste.info, String.Format("Received {0}", e.Messages.Length), "AsyncTCPServer.cs Client_OnReceived()");
             AsyncTCPServer server = (AsyncTCPServer)sender;
             server.Send(e.ClientID, new Message(24, new byte[] { 1, 2, 3, 4 }));
             
